@@ -9,10 +9,10 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>io.hsjang</groupId>
-	<artifactId>template-sv</artifactId>
+	<artifactId>omp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>template</name>
-	<description>template for spring + vue</description>
+	<name>omp</name>
+	<description>Open Map platform</description>
 
 	<properties>
 		<java.version>11</java.version>
