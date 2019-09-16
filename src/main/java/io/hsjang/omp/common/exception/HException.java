@@ -1,14 +1,21 @@
 package io.hsjang.omp.common.exception;
 
-public class HException extends RuntimeException{
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
+
+public class HException extends ResponseStatusException{
 
     private static final long serialVersionUID = 1L;
     
-    public HException(){
-        super();
+    public HException(HttpStatus status){
+        super(status);
     }
 
-    public HException(String message){
-        super(message);
+    public HException(HttpStatus status, String message){
+        super(status,message);
+    }
+
+    public HException(HttpStatus status, String message, String... params){
+        super(status,message);
     }
 }

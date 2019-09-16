@@ -9,7 +9,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
 import org.springframework.http.CacheControl;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.reactive.config.EnableWebFlux;
 import org.springframework.web.reactive.config.ResourceHandlerRegistry;
 import org.springframework.web.reactive.config.WebFluxConfigurer;
@@ -17,9 +19,11 @@ import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.WebExceptionHandler;
 
-import reactor.core.publisher.Mono;
+import io.hsjang.omp.common.exception.HException;
+import reactor.core.publisher.Flux;
 
 
 @SpringBootApplication
@@ -45,18 +49,23 @@ public class Application implements WebFluxConfigurer{
 	@Bean
 	@Order(-1)
 	public WebExceptionHandler exHandler(){
-		return (exchange, throwable) -> {
-			System.out.println("ERRRR!!");  // throwable 의 종류에 따라서 status 를 가져와서 처리면 될것 같음.
-			return Mono.empty();
-			// if (exchange.getResponse().isCommitted() || isDisconnectedClientError(throwable)) {
-			// 	return Mono.error(throwable);
-			// }
-			// this.errorAttributes.storeErrorInformation(throwable, exchange);
-			// ServerRequest request = ServerRequest.create(exchange, this.messageReaders);
-			// return getRoutingFunction(this.errorAttributes).route(request).switchIfEmpty(Mono.error(throwable))
-			// 		.flatMap((handler) -> handler.handle(request))
-			// 		.doOnNext((response) -> logError(request, response, throwable))
-			// 		.flatMap((response) -> write(exchange, response));
+		
+		return (exchange, ex) -> {
+
+			HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
+			String message = status.getReasonPhrase();
+			if(ex instanceof HException){
+				status = ((HException) ex).getStatus();
+				message = ((HException) ex).getReason();
+			}else if(ex instanceof ResponseStatusException){
+				status = ((ResponseStatusException) ex).getStatus();
+				String reason = ((ResponseStatusException) ex).getReason();
+				message = reason==null ? status.getReasonPhrase() : reason;
+			}
+			ServerHttpResponse res = exchange.getResponse();
+			res.setStatusCode(status);
+			res.getHeaders().setContentType(MediaType.APPLICATION_JSON_UTF8);
+			return res.writeWith( Flux.just(res.bufferFactory().wrap(String.format("{\"msg\":\"%s\"}",message).getBytes())) );
 		};
 	}
 }
