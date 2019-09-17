@@ -8,6 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.Resource;
+import org.springframework.data.mongodb.repository.config.EnableReactiveMongoRepositories;
 import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -28,6 +29,7 @@ import reactor.core.publisher.Flux;
 
 @SpringBootApplication
 @EnableWebFlux
+@EnableReactiveMongoRepositories
 public class Application implements WebFluxConfigurer{
 
 	@Value("classpath:/static/index.html") Resource index;
